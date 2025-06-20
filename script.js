@@ -39,16 +39,38 @@ function abrirModal(tipo, numero) {
 }
 
 function salvarEdicao() {
-  const nome = document.getElementById("colaboradorNome").value;
-  const matricula = document.getElementById("colaboradorMatricula").value;
+  const nome = document.getElementById("colaboradorNome").value.trim();
+  const matricula = document.getElementById("colaboradorMatricula").value.trim();
   const { tipo, numero } = armarioAtual;
+
+  // Verifica se a matrícula já existe em outro armário
+  if (matricula) {
+    let armarioExistente = null;
+
+    Object.keys(armarios).forEach(sexo => {
+      armarios[sexo].forEach(arm => {
+        if (arm.chapa === matricula && !(sexo === tipo && arm.numero === numero)) {
+          armarioExistente = { sexo, numero: arm.numero };
+        }
+      });
+    });
+
+    if (armarioExistente) {
+      const nomeSexo = armarioExistente.sexo === "masculinos" ? "Masculino" : "Feminino";
+      alert(`Essa matrícula já está vinculada ao armário ${nomeSexo} #${armarioExistente.numero}.`);
+      return;
+    }
+  }
+
   const armario = armarios[tipo].find(a => a.numero === numero);
   armario.colaborador = nome;
   armario.chapa = matricula;
+
   salvarNoLocalStorage();
   renderizarArmarios();
   bootstrap.Modal.getInstance(document.getElementById("editarModal")).hide();
 }
+
 
 function removerArmario() {
   const { tipo, numero } = armarioAtual;

@@ -1,0 +1,124 @@
+/* === Modo Escuro - Base === */
+body {
+  background-color: #2b2b2b;
+  color: #5a5959;
+  font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Títulos */
+h1, h3 {
+  font-weight: 600;
+  color: #ffc107; /* Amarelo destaque */
+}
+
+/* Container de armários */
+#masculinos, #femininos {
+  background-color: #1f1f1f;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.15);
+  min-height: 300px;
+}
+
+/* Botões dos armários */
+.armario-btn {
+  width: 60px;
+  height: 60px;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Botão ocupado = vermelho */
+.ocupado {
+  background-color: #dc3545; /* vermelho */
+  color: #fff;
+}
+
+/* Botão vazio = amarelo escuro */
+.vazio {
+  background-color: #ffc107; /* amarelo */
+  color: #212529;
+}
+
+/* Hover */
+.armario-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 0 12px rgba(255, 193, 7, 0.5);
+}
+
+/* Modal */
+.modal-content {
+  background-color: #1e1e1e;
+  color: #fff;
+  border-radius: 12px;
+  border: 1px solid #ffc107;
+  box-shadow: 0 5px 30px rgba(0, 0, 0, 0.7);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-header {
+  border-bottom: 1px solid #ffc107;
+}
+
+.modal-footer {
+  border-top: 1px solid #ffc107;
+}
+
+.modal-body input {
+  margin-bottom: 1rem;
+  background-color: #2a2a2a;
+  border: 1px solid #555;
+  color: #f1f1f1;
+  border-radius: 8px;
+}
+
+.modal-body input:focus {
+  border-color: #ffc107;
+  box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+/* Top Buttons */
+.btn {
+  transition: all 0.3s ease;
+}
+
+.btn-success {
+  background-color: #28a745;
+  border: none;
+}
+
+.btn-outline-danger {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .armario-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 0.8rem;
+  }
+
+  .container {
+    padding: 1rem;
+  }
+}
+
+/* Animação */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

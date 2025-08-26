@@ -1,5 +1,5 @@
-const totalArmariosMasculinos = 100;
-const totalArmariosFemininos = 119;
+let totalArmariosMasculinos = 100;
+let totalArmariosFemininos = 119;
 let armarios = { masculinos: [], femininos: [] };
 let armarioAtual = null;
 
@@ -147,6 +147,33 @@ function importarPlanilha(event) {
     reader.readAsBinaryString(file);
   }
 }
+function salvarConfiguracao() {
+  const qtdM = parseInt(document.getElementById("qtdMasculinos").value);
+  const qtdF = parseInt(document.getElementById("qtdFemininos").value);
+
+  if (!isNaN(qtdM) && qtdM >= 0) totalArmariosMasculinos = qtdM;
+  if (!isNaN(qtdF) && qtdF >= 0) totalArmariosFemininos = qtdF;
+
+  // Recria os armários mantendo os dados existentes quando possível
+  const novosArmarios = { masculinos: [], femininos: [] };
+
+  for (let i = 1; i <= totalArmariosMasculinos; i++) {
+    const existente = armarios.masculinos.find(a => a.numero === i);
+    novosArmarios.masculinos.push(existente || { numero: i, colaborador: "", chapa: "" });
+  }
+
+  for (let i = 1; i <= totalArmariosFemininos; i++) {
+    const existente = armarios.femininos.find(a => a.numero === i);
+    novosArmarios.femininos.push(existente || { numero: i, colaborador: "", chapa: "" });
+  }
+
+  armarios = novosArmarios;
+  salvarNoLocalStorage();
+  renderizarArmarios();
+
+  bootstrap.Modal.getInstance(document.getElementById("configModal")).hide();
+}
+
 
 
 // Inicializa tudo ao carregar
@@ -155,6 +182,8 @@ window.onload = () => {
   if (dadosSalvos) {
     try {
       armarios = JSON.parse(dadosSalvos);
+      totalArmariosMasculinos = armarios.masculinos.length;
+      totalArmariosFemininos = armarios.femininos.length;
     } catch {
       console.warn("Dados corrompidos no localStorage. Inicializando do zero.");
       criarArmarios();
@@ -163,8 +192,41 @@ window.onload = () => {
   } else {
     criarArmarios();
   }
+
+  // Preenche os inputs do modal
+  document.getElementById("qtdMasculinos").value = totalArmariosMasculinos;
+  document.getElementById("qtdFemininos").value = totalArmariosFemininos;
 };
+
 
 function salvarNoLocalStorage() {
   localStorage.setItem("armarios", JSON.stringify(armarios));
+}
+
+// ADCionando função limpar tudo
+function limparTudo() {
+  const confirmar = confirm(
+    "Tem certeza que deseja LIMPAR TODOS os dados (nomes e matrículas) de TODOS os armários? Esta ação não pode ser desfeita."
+  );
+  if (!confirmar) return;
+
+  // Zera colaborador e matrícula em todos os armários, preservando a quantidade atual
+  ["masculinos", "femininos"].forEach(sexo => {
+    armarios[sexo] = armarios[sexo].map(a => ({
+      ...a,
+      colaborador: "",
+      chapa: ""
+    }));
+  });
+
+  // Persiste vazio e re-renderiza
+  salvarNoLocalStorage();
+  renderizarArmarios();
+
+  // Se o modal de edição estiver aberto, fecha
+  const modalEl = document.getElementById("editarModal");
+  const instancia = bootstrap.Modal.getInstance(modalEl);
+  if (instancia) instancia.hide();
+
+  alert("Pronto! Todos os armários foram esvaziados.");
 }

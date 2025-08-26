@@ -34,7 +34,16 @@ h1, h3 {
   justify-content: center;
   font-weight: bold;
 }
-
+.btn-warning {
+  background-color: #ffc107;
+  border: none;
+  color: #212529;
+  font-weight: bold;
+}
+.btn-warning:hover {
+  background-color: #e0a800;
+  color: #fff;
+}
 /* Botão ocupado = vermelho */
 .ocupado {
   background-color: #dc3545; /* vermelho */

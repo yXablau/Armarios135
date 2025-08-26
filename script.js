@@ -27,7 +27,7 @@ function renderizarArmarios() {
     });
   });
 }
-
+//model
 function abrirModal(tipo, numero) {
   armarioAtual = { tipo, numero };
   const armario = armarios[tipo].find(a => a.numero === numero);

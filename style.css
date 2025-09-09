@@ -87,6 +87,14 @@ h1, h3 {
   color: #f1f1f1;
   border-radius: 8px;
 }
+/* Botão em manutenção */
+.manutencao {
+  background-color: #6c757d !important; /* cinza */
+  color: #fff;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
 
 .modal-body input:focus {
   border-color: #ffc107;

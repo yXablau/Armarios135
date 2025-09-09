@@ -5,10 +5,10 @@ let armarioAtual = null;
 
 function criarArmarios() {
   for (let i = 1; i <= totalArmariosMasculinos; i++) {
-    armarios.masculinos.push({ numero: i, colaborador: "", chapa: "" });
+    armarios.masculinos.push({ numero: i, colaborador: "", chapa: "", manutencao: false });
   }
   for (let i = 1; i <= totalArmariosFemininos; i++) {
-    armarios.femininos.push({ numero: i, colaborador: "", chapa: "" });
+    armarios.femininos.push({ numero: i, colaborador: "", chapa: "", manutencao: false });
   }
   renderizarArmarios();
 }
@@ -19,21 +19,29 @@ function renderizarArmarios() {
     container.innerHTML = "";
     armarios[tipo].forEach(armario => {
       const btn = document.createElement("button");
-      btn.className = `btn armario-btn ${armario.colaborador ? "ocupado" : "vazio"}`;
+      btn.className = `btn armario-btn 
+        ${armario.manutencao ? "manutencao" : armario.colaborador ? "ocupado" : "vazio"}`;
       btn.innerText = armario.numero;
-      btn.title = armario.colaborador || "Disponível";
+      btn.title = armario.colaborador || (armario.manutencao ? "Em manutenção" : "Disponível");
+
+      // Sempre permite abrir o modal, mesmo se estiver em manutenção
       btn.onclick = () => abrirModal(tipo, armario.numero);
+
       container.appendChild(btn);
     });
   });
 }
-//model
+
+// Modal
 function abrirModal(tipo, numero) {
   armarioAtual = { tipo, numero };
   const armario = armarios[tipo].find(a => a.numero === numero);
+
   document.getElementById("colaboradorNome").value = armario.colaborador;
   document.getElementById("armarioSelecionado").innerText = `#${numero}`;
   document.getElementById("colaboradorMatricula").value = armario.chapa;
+  document.getElementById("armarioManutencao").checked = armario.manutencao;
+
   const modal = new bootstrap.Modal(document.getElementById("editarModal"));
   modal.show();
 }
@@ -41,6 +49,7 @@ function abrirModal(tipo, numero) {
 function salvarEdicao() {
   const nome = document.getElementById("colaboradorNome").value.trim();
   const matricula = document.getElementById("colaboradorMatricula").value.trim();
+  const manutencao = document.getElementById("armarioManutencao").checked;
   const { tipo, numero } = armarioAtual;
 
   // Verifica se a matrícula já existe em outro armário
@@ -65,18 +74,20 @@ function salvarEdicao() {
   const armario = armarios[tipo].find(a => a.numero === numero);
   armario.colaborador = nome;
   armario.chapa = matricula;
+  armario.manutencao = manutencao;
 
   salvarNoLocalStorage();
   renderizarArmarios();
   bootstrap.Modal.getInstance(document.getElementById("editarModal")).hide();
 }
 
-
 function removerArmario() {
   const { tipo, numero } = armarioAtual;
   const armario = armarios[tipo].find(a => a.numero === numero);
   armario.colaborador = "";
   armario.chapa = "";
+  armario.manutencao = false;
+
   salvarNoLocalStorage();
   renderizarArmarios();
   bootstrap.Modal.getInstance(document.getElementById("editarModal")).hide();
@@ -91,7 +102,8 @@ function exportarPlanilha() {
         Sexo: sexo === "masculinos" ? "Masculino" : "Feminino",
         Número: armario.numero,
         Colaborador: armario.colaborador,
-        Matrícula: armario.chapa
+        Matrícula: armario.chapa,
+        Manutenção: armario.manutencao ? "Sim" : "Não"
       });
     });
   });
@@ -127,7 +139,8 @@ function importarPlanilha(event) {
           armarios[tipo].push({
             numero: parseInt(row["Número"]),
             colaborador: row["Colaborador"] || "",
-            chapa: row["Matrícula"] || ""
+            chapa: row["Matrícula"] || "",
+            manutencao: row["Manutenção"] === "Sim"
           });
         });
       } else {
@@ -147,6 +160,7 @@ function importarPlanilha(event) {
     reader.readAsBinaryString(file);
   }
 }
+
 function salvarConfiguracao() {
   const qtdM = parseInt(document.getElementById("qtdMasculinos").value);
   const qtdF = parseInt(document.getElementById("qtdFemininos").value);
@@ -159,12 +173,12 @@ function salvarConfiguracao() {
 
   for (let i = 1; i <= totalArmariosMasculinos; i++) {
     const existente = armarios.masculinos.find(a => a.numero === i);
-    novosArmarios.masculinos.push(existente || { numero: i, colaborador: "", chapa: "" });
+    novosArmarios.masculinos.push(existente || { numero: i, colaborador: "", chapa: "", manutencao: false });
   }
 
   for (let i = 1; i <= totalArmariosFemininos; i++) {
     const existente = armarios.femininos.find(a => a.numero === i);
-    novosArmarios.femininos.push(existente || { numero: i, colaborador: "", chapa: "" });
+    novosArmarios.femininos.push(existente || { numero: i, colaborador: "", chapa: "", manutencao: false });
   }
 
   armarios = novosArmarios;
@@ -173,8 +187,6 @@ function salvarConfiguracao() {
 
   bootstrap.Modal.getInstance(document.getElementById("configModal")).hide();
 }
-
-
 
 // Inicializa tudo ao carregar
 window.onload = () => {
@@ -198,32 +210,29 @@ window.onload = () => {
   document.getElementById("qtdFemininos").value = totalArmariosFemininos;
 };
 
-
 function salvarNoLocalStorage() {
   localStorage.setItem("armarios", JSON.stringify(armarios));
 }
 
-// ADCionando função limpar tudo
+// Limpar tudo
 function limparTudo() {
   const confirmar = confirm(
     "Tem certeza que deseja LIMPAR TODOS os dados (nomes e matrículas) de TODOS os armários? Esta ação não pode ser desfeita."
   );
   if (!confirmar) return;
 
-  // Zera colaborador e matrícula em todos os armários, preservando a quantidade atual
   ["masculinos", "femininos"].forEach(sexo => {
     armarios[sexo] = armarios[sexo].map(a => ({
       ...a,
       colaborador: "",
-      chapa: ""
+      chapa: "",
+      manutencao: false
     }));
   });
 
-  // Persiste vazio e re-renderiza
   salvarNoLocalStorage();
   renderizarArmarios();
 
-  // Se o modal de edição estiver aberto, fecha
   const modalEl = document.getElementById("editarModal");
   const instancia = bootstrap.Modal.getInstance(modalEl);
   if (instancia) instancia.hide();
